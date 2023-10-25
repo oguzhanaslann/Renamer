@@ -6,9 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class Renamer {
-    public static final String PATH_OF_DIR = "/Users/oguzhanmac/Desktop/facebook";
-    public static final String FILE_MIME_TYPE = ".png";
-    public static final String RENAME_TEMPLATE = "ic_facebook_<x>" + FILE_MIME_TYPE;
+    public static final String PATH_OF_DIR = "/Users/oguzhanmac/Desktop/empty_state_avatar";
 
     public static void main(String[] args) {
         File file = new File(PATH_OF_DIR);
@@ -26,8 +24,7 @@ public class Renamer {
 
         AtomicInteger childIndex = new AtomicInteger();
         fileStream.forEach((child -> {
-            String fileNewName = RENAME_TEMPLATE.replace("<x>", suffixOfFile(childIndex.get()));
-            File newNamedFile = new File(PATH_OF_DIR + "/" + fileNewName);
+            File newNamedFile = androidNamedFile(childIndex, child);
             child.renameTo(newNamedFile);
             childIndex.getAndIncrement();
         }));
@@ -35,7 +32,17 @@ public class Renamer {
     }
 
     @NotNull
-    private static CharSequence suffixOfFile(int childIndex) {
-        return "x" + (childIndex + 1);
+    private static File indexedNamedFile(AtomicInteger childIndex, File child) {
+        TemplateIndexedRenameStrategy renameStrategy = new TemplateIndexedRenameStrategy();
+        String fileNewName= renameStrategy.rename(child.getName(), childIndex.get());
+        return new File(PATH_OF_DIR + "/" + fileNewName);
+    }
+
+
+    @NotNull
+    private static File androidNamedFile(AtomicInteger childIndex, File child) {
+        AndroidFileRenameStrategy renameStrategy = new AndroidFileRenameStrategy();
+        String fileNewName = renameStrategy.rename(child.getName(), childIndex.get());
+        return new File(PATH_OF_DIR + "/" + fileNewName);
     }
 }
